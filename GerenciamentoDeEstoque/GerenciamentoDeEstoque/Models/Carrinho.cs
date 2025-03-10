@@ -14,15 +14,14 @@ namespace GerenciamentoDeEstoque.Models
         public int Quantidade { get; set; }
         public int Id { get; set; }
 
-        public Carrinho(string nomeProduto, int produtoId, int pedidoId, int quantidade)
+        public Carrinho(int produtoId, int pedidoId, int quantidade)
         {
-            NomeProduto = nomeProduto;
             ProdutoId = produtoId;
             PedidoId = pedidoId;
             Quantidade = quantidade;
         }
 
-        public Carrinho(string nomeProduto, int produtoId, int pedidoId, int quantidade, int id)
+        public Carrinho(int produtoId, int pedidoId, int quantidade, int id, string nomeProduto)
         {
             NomeProduto = nomeProduto;
             ProdutoId = produtoId;
