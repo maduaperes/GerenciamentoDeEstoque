@@ -1,3 +1,4 @@
+
 # Sistema de Gerenciamento de Estoque
 
 Este é o repositório do Sistema de Gerenciamento de Estoque, desenvolvido para otimizar a administração de produtos, pedidos e usuários em um ambiente comercial.
@@ -115,3 +116,29 @@ Para obter o código-fonte do sistema, execute o seguinte comando:
 
 ```bash
 git clone https://github.com/Leozitos96/UC8-Gerenciamento-de-estoque.git
+```
+
+Acesse o diretório do projeto: 
+
+```bash 
+cd UC8-Gerenciamento-de-estoque
+```
+
+### 8.2 Configuração do SQLite 
+
+- O banco de dados utilizado no sistema é o SQLite. Para configurá-lo: 
+
+- Certifique-se de que o arquivo database.db está presente na raiz do projeto. 
+
+- Caso o arquivo não exista, o sistema criará automaticamente a estrutura de tabelas na primeira execução. 
+
+### 8.3 Executando o Sistema 
+
+- Para rodar o sistema, utilize o seguinte comando: 
+``` bash
+dotnet run 
+```  
+
+Isso iniciará a aplicação e abrirá a interface gráfica para gerenciamento de estoque. 
+
+Autores : Maria Eduarda Arruda Peres, Luis Felipe Bueno, Leonardo Kerne, Yuri Ribeiro, Luiz M Ribeiro
