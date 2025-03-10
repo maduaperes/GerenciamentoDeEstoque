@@ -121,7 +121,7 @@ git clone https://github.com/Leozitos96/UC8-Gerenciamento-de-estoque.git
 Acesse o diretório do projeto: 
 
 ```bash 
-cd UC8-Gerenciamento-de-estoque
+cd Gerenciamento-de-estoque
 ```
 
 ### 8.2 Configuração do SQLite 
