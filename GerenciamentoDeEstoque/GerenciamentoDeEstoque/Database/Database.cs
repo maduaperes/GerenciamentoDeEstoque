@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -367,6 +368,84 @@ namespace GerenciamentoDeEstoque.Database
             return itens;
         }
 
+        /* Método para retornar uma lista de produtos do Carrinho
+        exemplo: List<Usuario> usuarios = ObterUsuarios();
+        */
+        public List<Usuario> ObterUsuarios()
+        {
+            List<Usuario> usuarios = new List<Usuario>();
+            string conectar = "Data Source=database.db";
+
+            using (var connection = new SqliteConnection(conectar))
+            {
+                connection.Open();
+                string query = "SELECT Nome, Cargo, Senha FROM Usuario";
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = query;
+
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            string nome = reader.GetString(0);
+                            string cargo = reader.GetString(1);
+                            string senha = reader.GetString(2);
+                            Usuario usuario = new Usuario(nome, cargo);
+                            usuarios.Add(usuario);
+                        }
+                    }
+                }
+            }
+            return usuarios;
+        }
+
+
+        /* Método para atualizar um usuario*/
+        public void AtualizarUsuario(int id, string novoNome, string novoCargo, string novaSenha)
+        {
+            string conectar = "Data Source=database.db";
+
+            using (var connection = new SqliteConnection(conectar))
+            {
+                connection.Open();
+                string query = "UPDATE Usuario SET Nome = @Nome, Cargo = @Cargo, Senha = @Senha WHERE Id = @Id";
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@Nome", novoNome);
+                    cmd.Parameters.AddWithValue("@Cargo", novoCargo);
+                    cmd.Parameters.AddWithValue("@Senha", novaSenha);
+                    cmd.Parameters.AddWithValue("@Id", id);
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    Console.WriteLine($"{rowsAffected} linha(s) atualizada(s).");
+                }
+            }
+        }
+
+        /* Método para remover um usuario*/
+        public void RemoverUsuario(int id)
+        {
+            string conectar = "Data Source=database.db";
+
+            using (var connection = new SqliteConnection(conectar))
+            {
+                connection.Open();
+                string query = "DELETE FROM Usuario WHERE Id = @Id";
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = query;
+                    cmd.Parameters.AddWithValue("@Id", id);
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    Console.WriteLine($"{rowsAffected} linha(s) removida(s).");
+                }
+            }
+        }
 
     }
 }
