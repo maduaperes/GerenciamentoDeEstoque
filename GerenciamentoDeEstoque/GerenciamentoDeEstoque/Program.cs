@@ -14,6 +14,7 @@ namespace GerenciamentoDeEstoque
         [STAThread]
         static void Main()
         {
+            Database.Database.CriarTabelasNoBanco();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Login());

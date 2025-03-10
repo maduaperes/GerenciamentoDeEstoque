@@ -166,8 +166,8 @@ namespace GerenciamentoDeEstoque.Database
                     cmd.CommandText = inserir;
                     cmd.Parameters.AddWithValue("@nomecliente", pedido.Nome);
                     cmd.Parameters.AddWithValue("@cpfcliente", pedido.Cpf);
-                    cmd.Parameters.AddWithValue("@data", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
-                    cmd.Parameters.AddWithValue("@total", 0);
+                    cmd.Parameters.AddWithValue("@data", pedido.Data);
+                    cmd.Parameters.AddWithValue("@total", pedido.Total);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -273,7 +273,7 @@ namespace GerenciamentoDeEstoque.Database
         /* Método para retornar uma lista de produtos
            exemplo: List<Produto> produtos = ObterProdutos();
         */
-        public static List<Produto> ObterProdutos()
+        public  List<Produto> ObterProdutos()
         {
             List<Produto> produtos = new List<Produto>();
             string conectar = "Data Source=database.db";
@@ -305,7 +305,7 @@ namespace GerenciamentoDeEstoque.Database
         /* Método para retornar uma lista de produtos
            exemplo: List<Pedido> pedidos = ObterPedidos();
         */
-        public static List<Pedido> ObterPedidos()
+        public  List<Pedido> ObterPedidos()
         {
             List<Pedido> pedidos = new List<Pedido>();
             string conectar = "Data Source=database.db";
@@ -338,7 +338,7 @@ namespace GerenciamentoDeEstoque.Database
         /* Método para retornar uma lista de produtos do Carrinho
            exemplo: List<Carrinho> itens = ObterCarrinho(ID_PEDIDO);
         */
-        public static List<Carrinho> ObterCarrinho(int pedidoId)
+        public  List<Carrinho> ObterCarrinho(int pedidoId)
         {
             List<Carrinho> itens = new List<Carrinho>();
             string conectar = "Data Source=database.db";
@@ -359,7 +359,7 @@ namespace GerenciamentoDeEstoque.Database
                             string produtoNome = reader.GetString(1);
                             int produtoId = reader.GetInt32(2);
                             int quantidade = reader.GetInt32(3);
-                            Carrinho carrinho = new Carrinho(produtoNome, produtoId, pedidoId, quantidade, id);
+                            Carrinho carrinho = new Carrinho(produtoId, pedidoId, quantidade, id, produtoNome);
                             itens.Add(carrinho);
                         }
                     }
