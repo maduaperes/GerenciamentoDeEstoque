@@ -136,7 +136,7 @@ namespace GerenciamentoDeEstoque.Database
                 connection.Open();
                 using (var cmd = connection.CreateCommand())
                 {
-                    cmd.CommandText = "DELETE FROM Pedidos WHERE ProdutoId = @id";
+                    cmd.CommandText = "DELETE FROM Carrinho WHERE ProdutoId = @id";
                     cmd.Parameters.AddWithValue("@id", id);
                     cmd.ExecuteNonQuery();
                 }
@@ -151,7 +151,7 @@ namespace GerenciamentoDeEstoque.Database
         }
 
         // Método para cadastrar um novo pedido 
-        public void CriarPedido(Cliente cliente)
+        public void CriarPedido(Pedido pedido)
         {
             string conectar = "Data Source=database.db";
 
@@ -163,10 +163,33 @@ namespace GerenciamentoDeEstoque.Database
                 using (var cmd = connection.CreateCommand())
                 {
                     cmd.CommandText = inserir;
-                    cmd.Parameters.AddWithValue("@nomecliente", cliente.Nome);
-                    cmd.Parameters.AddWithValue("@cpfcliente", cliente.Cpf);
+                    cmd.Parameters.AddWithValue("@nomecliente", pedido.Nome);
+                    cmd.Parameters.AddWithValue("@cpfcliente", pedido.Cpf);
                     cmd.Parameters.AddWithValue("@data", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
                     cmd.Parameters.AddWithValue("@total", 0);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // Método para remover um pedido
+        public void RemoverPedido(int id)
+        {
+            string conectar = "Data Source=database.db";
+            using (var connection = new SqliteConnection(conectar))
+            {
+                connection.Open();
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = "DELETE FROM Carrinho WHERE PedidoId = @id";
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = "DELETE FROM Pedidos WHERE Id = @id";
+                    cmd.Parameters.AddWithValue("@id", id);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -210,5 +233,140 @@ namespace GerenciamentoDeEstoque.Database
 
             }
         }
+
+        /* Método para remover um produto no carrinho, atualiza no banco a quantia que foi removida e
+         * atualiza na tabela PEDIDOS o total do preco*/
+        public void RemoverItemCarrinho(int carrinhoId ,int pedidoId, int produtoId, int quantidade)
+        {
+            string conectar = "Data Source=database.db";
+            using (var connection = new SqliteConnection(conectar))
+            {
+                string delete = "DELETE Quantidade = @quantidade FROM Carrinho WHERE Id = @id";
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = delete;
+                    cmd.Parameters.AddWithValue("@id", carrinhoId);
+                    cmd.Parameters.AddWithValue("@quantidade", quantidade);
+                    cmd.ExecuteNonQuery();
+                }
+                string updateProdutos = "UPDATE Produtos SET Quantidade = Quantidade + @quantidade WHERE Id = @Id";
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = updateProdutos;
+                    cmd.Parameters.AddWithValue("@Id", produtoId);
+                    cmd.Parameters.AddWithValue("@quantidade", quantidade);
+                    cmd.ExecuteNonQuery();
+                }
+
+                string updateTotal = @"UPDATE Pedidos SET Total = (SELECT COALESCE(SUM(Produtos.Preco * Carrinho.Quantidade), 0) FROM Carrinho JOIN Produtos ON Carrinho.ProdutoId = Produtos.Id  WHERE Carrinho.PedidoId = @pedidoId) WHERE Id = @pedidoId;";
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = updateTotal;
+                    cmd.Parameters.AddWithValue("@pedidoId", pedidoId);
+                    cmd.ExecuteNonQuery();
+                }
+
+            }
+        }
+
+        /* Método para retornar uma lista de produtos
+           exemplo: List<Produto> produtos = ObterProdutos();
+        */
+        public static List<Produto> ObterProdutos()
+        {
+            List<Produto> produtos = new List<Produto>();
+            string conectar = "Data Source=database.db";
+            using (var connection = new SqliteConnection(conectar))
+            {
+                connection.Open();
+                string select = "SELECT Id, Nome, Codigo, Quantidade, Preco FROM Produtos";
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = select;
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())  
+                        {
+                            int id = reader.GetInt32(0);
+                            string nome = reader.GetString(1);
+                            int codigo = reader.GetInt32(2);
+                            int quantidade = reader.GetInt32(3);
+                            decimal preco = reader.GetDecimal(4);
+                            Produto produto = new Produto(nome, quantidade, codigo, preco, id);
+                            produtos.Add(produto);
+                        }
+                    }
+                }
+            }
+            return produtos;
+        }
+
+        /* Método para retornar uma lista de produtos
+           exemplo: List<Pedido> pedidos = ObterPedidos();
+        */
+        public static List<Pedido> ObterPedidos()
+        {
+            List<Pedido> pedidos = new List<Pedido>();
+            string conectar = "Data Source=database.db";
+            using (var connection = new SqliteConnection(conectar))
+            {
+
+                connection.Open();
+                string select = "SELECT Id, ClienteNome, ClienteCPF, Data, Total FROM Produtos";
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = select;
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(0);
+                            string nome = reader.GetString(1);
+                            string cpf = reader.GetString(2);
+                            string data = reader.GetString(3);
+                            decimal total = reader.GetDecimal(4);
+                            Pedido pedido = new Pedido(nome, cpf, data, total, id);
+                            pedidos.Add(pedido);
+                        }
+                    }
+                }
+            }
+            return pedidos;
+        }
+
+        /* Método para retornar uma lista de produtos do Carrinho
+           exemplo: List<Carrinho> itens = ObterCarrinho(ID_PEDIDO);
+        */
+        public static List<Carrinho> ObterCarrinho(int pedidoId)
+        {
+            List<Carrinho> itens = new List<Carrinho>();
+            string conectar = "Data Source=database.db";
+            using (var connection = new SqliteConnection(conectar))
+            {
+
+                connection.Open();
+                string select = "SELECT Carrinho.Id, Produtos.Nome, Carrinho.ProdutoId, Carrinho.Quantidade FROM Carrinho JOIN Produtos ON Carrinho.ProdutoId = Produtos.Id WHERE Carrinho.PedidoId = @pedidoId";
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.Parameters.AddWithValue("@pedidoId", pedidoId);
+                    cmd.CommandText = select;
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int id = reader.GetInt32(0);
+                            string produtoNome = reader.GetString(1);
+                            int produtoId = reader.GetInt32(2);
+                            int quantidade = reader.GetInt32(3);
+                            Carrinho carrinho = new Carrinho(produtoNome, produtoId, pedidoId, quantidade, id);
+                            itens.Add(carrinho);
+                        }
+                    }
+                }
+            }
+            return itens;
+        }
+
+
     }
 }
